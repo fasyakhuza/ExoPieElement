@@ -46,6 +46,12 @@ options.register ('runOn2016',
 		  VarParsing.varType.bool,
 		  "runOn2016")
 
+options.register ('runOnSignal',
+		  False,
+		  VarParsing.multiplicity.singleton,
+		  VarParsing.varType.bool,
+		  "runOnSignal")
+
 options.parseArguments()
 
 
@@ -78,7 +84,7 @@ elif options.runOn2016:
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(300)
+    input = cms.untracked.int32(100)
 )
 
 ## New from Egamma
@@ -92,17 +98,18 @@ setupEgammaPostRecoSeq(process,
                        era='2017-Nov17ReReco')  #era is new to select between 2016 / 2017,  it defaults to 2017
 
 
+testFile=""
 # Input source
 if options.runOn2017:
-	if options.runOnMC:
-            testFile='file:/hdfs//store/mc/RunIIFall17MiniAODv2/Wprimetotb_M4400W880_LH_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/60000/FE56118F-A78F-EA11-95E6-0025904A9472.root'
-	else:
-		testFile='/store/data/Run2017B/MET/MINIAOD/31Mar2018-v1/100000/16963797-0937-E811-ABE2-008CFAE45134.root'
+    if options.runOnMC:
+        testFile='/store/mc/RunIIFall17MiniAODv2/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/70000/FED523F4-C856-E811-8AA7-0025905A60D6.root'
+    else:
+        testFile='/store/data/Run2017B/MET/MINIAOD/31Mar2018-v1/100000/16963797-0937-E811-ABE2-008CFAE45134.root'
 elif options.runOn2016:
-	if options.runOnMC:
-		testFile='/store/mc/RunIISummer16MiniAODv3/DYJetsToLL_M-50_HT-70to100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v2/110000/FC23A1C1-1BEA-E811-9671-0025905C445A.root'
-	else:
-		testFile='/store/data/Run2016B/MET/MINIAOD/17Jul2018_ver2-v1/40000/FE78E8B0-288C-E811-81FC-0025904CDDF8.root'
+    if options.runOnMC:
+        testFile='/store/mc/RunIIFall17MiniAODv2/bbDM_2HDMa_LO_5f_TuneCP3_13TeV_madgraph_pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/120000/00EC94C6-59F9-EA11-A069-000D3AB6FB6B.root'
+    else:
+        testFile='/store/data/Run2016B/MET/MINIAOD/17Jul2018_ver2-v1/40000/FE78E8B0-288C-E811-81FC-0025904CDDF8.root'
 
 
 process.source = cms.Source("PoolSource",
@@ -125,8 +132,8 @@ updateJetCollection(
    jetCorrections = ('AK8PFPuppi', cms.vstring(['L2Relative', 'L3Absolute','L2L3Residual']), 'None'),
    btagDiscriminators = [
       'pfBoostedDoubleSecondaryVertexAK8BJetTags',
-      'pfDeepDoubleBJetTags:probQ',
-      'pfDeepDoubleBJetTags:probH',
+#      'pfDeepDoubleBJetTags:probQ',
+#      'pfDeepDoubleBJetTags:probH',
       'pfDeepDoubleBvLJetTags:probQCD',
       'pfDeepDoubleBvLJetTags:probHbb',
       'pfDeepDoubleCvLJetTags:probQCD',
@@ -148,8 +155,46 @@ updateJetCollection(
       'pfMassDecorrelatedDeepBoostedDiscriminatorsJetTags:ZHbbvsQCD',
       ]
         )
+
+## adding particleNet
+from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetJetTagsAll as pfParticleNetJetTagsAll
+updateJetCollection(
+    process,
+    jetSource = cms.InputTag('selectedUpdatedPatJets'),
+    pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'),
+    svSource = cms.InputTag('slimmedSecondaryVertices'),
+    rParam = 0.8,
+    jetCorrections = ('AK8PFPuppi', cms.vstring(['L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
+    btagDiscriminators = pfParticleNetJetTagsAll,
+    postfix='AK8WithParticleNet',
+    printWarning = False
+   )
+
+
+
 ## This is for modified MET, needed only for 2017 data
 if options.runOn2017:
+
+    process.load('RecoMET.METFilters.ecalBadCalibFilter_cfi')
+    baddetEcallist = cms.vuint32([872439604,872422825,872420274,872423218,
+     872423215,872416066,872435036,872439336,
+     872420273,872436907,872420147,872439731,
+     872436657,872420397,872439732,872439339,
+     872439603,872422436,872439861,872437051,
+     872437052,872420649,872422436,872421950,
+     872437185,872422564,872421566,872421695,
+     872421955,872421567,872437184,872421951,
+     872421694,872437056,872437057,872437313])
+
+    
+    process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter("EcalBadCalibFilter",
+      EcalRecHitSource = cms.InputTag("reducedEgamma:reducedEERecHits"),
+      ecalMinEt        = cms.double(50.),
+      baddetEcal    = baddetEcallist, 
+      taggingMode = cms.bool(True),
+      debug = cms.bool(False)
+      )
+    
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
     runMetCorAndUncFromMiniAOD (
         process,
@@ -314,7 +359,7 @@ from JMEAnalysis.JetToolbox.jetToolbox_cff import jetToolbox
 
 ### CA15Puppi
 ### do we still need this? I guess no.
-jetToolbox( process, 'ca15', 'jetSequence', 'out', PUMethod='Puppi', miniAOD=options.useMiniAOD, runOnMC=options.runOnMC,
+jetToolbox( process, 'ca15', 'jetSequence', 'out', PUMethod='Puppi', dataTier='miniAOD', runOnMC=options.runOnMC,
 	    bTagDiscriminators=(bTagDiscriminators + ([] if NOTADDHBBTag else ['pfBoostedDoubleSecondaryVertexCA15BJetTags'])),
 	    JETCorrPayload='AK8PFPuppi',JETCorrLevels=jetCorrectionLevelsPuppi,
 	    subJETCorrPayload='AK4PFPuppi',subJETCorrLevels=jetCorrectionLevelsPuppi,
@@ -447,6 +492,7 @@ process.jetCorrSequenceForPrunedMass = cms.Sequence( process.patJetCorrFactorsRe
 
 
 process.load('ExoPieElement.TreeMaker.TreeMaker_cfi')
+process.tree.runOnSignal           = cms.bool(options.runOnSignal)
 process.tree.useJECText            = cms.bool(options.useJECText)
 process.tree.runOn2017             = cms.bool(options.runOn2017)
 process.tree.runOn2016             = cms.bool(options.runOn2016)
@@ -463,6 +509,11 @@ process.tree.CA15PuppijecNames     = cms.vstring(AK8PuppiJECTextFiles)
 process.tree.CA15PuppijecUncName   = cms.string(AK8PuppiJECUncTextFile)
 process.tree.fillCA15PuppiJetInfo  = cms.bool(False)
 
+process.tree.THINJets = cms.InputTag("appliedRegJets")
+process.tree.FATJets       = cms.InputTag("selectedUpdatedPatJetsAK8WithParticleNet")#("slimmedJetsAK8")
+process.tree.FATJetsForPrunedMass       = cms.InputTag("slimmedJetsAK8")
+process.tree.AK4PuppiJets  = cms.InputTag("slimmedJetsPuppi")
+
 if options.runOn2016:
     process.tree.pfType1Met = cms.InputTag("slimmedMETs")
 if options.runOn2017:
@@ -472,11 +523,11 @@ if options.runOn2017:
         process.tree.filterLabel = cms.InputTag("TriggerResults::RECO")
     process.tree.pfType1Met = cms.InputTag("slimmedMETsModifiedMET")
 
-if options.useJECText:
-	process.tree.THINJets      = cms.InputTag("patSmearedJets")
-	process.tree.FATJets       = cms.InputTag("selectedUpdatedPatJets")#("slimmedJetsAK8")
-	process.tree.FATJetsForPrunedMass       = cms.InputTag("slimmedJetsAK8")
-	process.tree.AK4PuppiJets  = cms.InputTag("slimmedJetsPuppi")
+# if options.useJECText:
+# 	process.tree.THINJets      = cms.InputTag("patSmearedJets")
+# 	process.tree.FATJets       = cms.InputTag("selectedUpdatedPatJets")#("slimmedJetsAK8")
+# 	process.tree.FATJetsForPrunedMass       = cms.InputTag("slimmedJetsAK8")
+# 	process.tree.AK4PuppiJets  = cms.InputTag("slimmedJetsPuppi")
 
 
 
@@ -556,6 +607,7 @@ process.appliedRegJets= cms.EDProducer('bRegressionProducer',
 if options.runOn2017:
 	if not options.useJECText:
 		process.analysis = cms.Path(
+			process.ecalBadCalibReducedMINIAODFilter*
 			process.trigFilter
             *process.prefiringweight
 			*process.rerunMvaIsolationSequence
@@ -563,16 +615,13 @@ if options.runOn2017:
 			process.egammaPostRecoSeq+
 			process.appliedRegJets+
 			process.fullPatMetSequenceModifiedMET+
-			process.patSmearedJets+
-			process.pfMet+
-			process.jetCorrSequenceAK4+  ## only when using JEC text files
-			process.jetCorrSequenceAK8+  ## only when using JEC text files
-			process.jetCorrSequenceAK4Puppi+ ## only when using JEC text files
-			process.jetCorrSequenceForPrunedMass+ ## only when using JEC text files
+			#process.patSmearedJets+
+			# process.pfMet+
 			process.tree
 			)
 	else:
 		process.analysis = cms.Path(
+			process.ecalBadCalibReducedMINIAODFilter*
 			process.trigFilter
             *process.prefiringweight
 			*process.rerunMvaIsolationSequence
@@ -581,7 +630,11 @@ if options.runOn2017:
 			process.appliedRegJets+
 			process.fullPatMetSequenceModifiedMET+
 			process.patSmearedJets+
-			process.pfMet+
+			process.jetCorrSequenceAK4+  ## only when using JEC text files
+			process.jetCorrSequenceAK8+  ## only when using JEC text files
+			process.jetCorrSequenceAK4Puppi+ ## only when using JEC text files
+			process.jetCorrSequenceForPrunedMass+ ## only when using JEC text files
+			# process.pfMet+
 			process.tree
 			)
 
@@ -594,12 +647,8 @@ elif options.runOn2016:
 			*process.NewTauIDsEmbedded+
 			process.egammaPostRecoSeq+
 			process.appliedRegJets+
-			process.patSmearedJets+
-			process.pfMet+
-			process.jetCorrSequenceAK4+  ## only when using JEC text files
-			process.jetCorrSequenceAK8+  ## only when using JEC text files
-			process.jetCorrSequenceAK4Puppi+ ## only when using JEC text files
-			process.jetCorrSequenceForPrunedMass+ ## only when using JEC text files
+			#process.patSmearedJets+
+			# process.pfMet+
 			process.tree
 			)
 	else:
@@ -611,7 +660,11 @@ elif options.runOn2016:
 			process.egammaPostRecoSeq+
 			process.appliedRegJets+
 			process.patSmearedJets+
-			process.pfMet+
+			process.jetCorrSequenceAK4+  ## only when using JEC text files
+			process.jetCorrSequenceAK8+  ## only when using JEC text files
+			process.jetCorrSequenceAK4Puppi+ ## only when using JEC text files
+			process.jetCorrSequenceForPrunedMass+ ## only when using JEC text files
+			# process.pfMet+
 			process.tree
 			)
 

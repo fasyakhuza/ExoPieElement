@@ -259,6 +259,8 @@ class jetTree  : public baseTree{
 
   // For CA15 double b-tagger and ECFs: ends here
 
+  // for particleNet and AK8Puppijet (FATjet)
+  std::vector<float>  jet_particleNet_;
 
   //jet  Hbb tagger for fat and add jet
 

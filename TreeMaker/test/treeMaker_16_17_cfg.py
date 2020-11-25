@@ -132,8 +132,8 @@ updateJetCollection(
    jetCorrections = ('AK8PFPuppi', cms.vstring(['L2Relative', 'L3Absolute','L2L3Residual']), 'None'),
    btagDiscriminators = [
       'pfBoostedDoubleSecondaryVertexAK8BJetTags',
-      'pfDeepDoubleBJetTags:probQ',
-      'pfDeepDoubleBJetTags:probH',
+#      'pfDeepDoubleBJetTags:probQ',
+#      'pfDeepDoubleBJetTags:probH',
       'pfDeepDoubleBvLJetTags:probQCD',
       'pfDeepDoubleBvLJetTags:probHbb',
       'pfDeepDoubleCvLJetTags:probQCD',
@@ -155,6 +155,23 @@ updateJetCollection(
       'pfMassDecorrelatedDeepBoostedDiscriminatorsJetTags:ZHbbvsQCD',
       ]
         )
+
+## adding particleNet
+from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetJetTagsAll as pfParticleNetJetTagsAll
+updateJetCollection(
+    process,
+    jetSource = cms.InputTag('selectedUpdatedPatJets'),
+    pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'),
+    svSource = cms.InputTag('slimmedSecondaryVertices'),
+    rParam = 0.8,
+    jetCorrections = ('AK8PFPuppi', cms.vstring(['L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
+    btagDiscriminators = pfParticleNetJetTagsAll,
+    postfix='AK8WithParticleNet',
+    printWarning = False
+   )
+
+
+
 ## This is for modified MET, needed only for 2017 data
 if options.runOn2017:
 
@@ -342,7 +359,7 @@ from JMEAnalysis.JetToolbox.jetToolbox_cff import jetToolbox
 
 ### CA15Puppi
 ### do we still need this? I guess no.
-jetToolbox( process, 'ca15', 'jetSequence', 'out', PUMethod='Puppi', miniAOD=options.useMiniAOD, runOnMC=options.runOnMC,
+jetToolbox( process, 'ca15', 'jetSequence', 'out', PUMethod='Puppi', dataTier='miniAOD', runOnMC=options.runOnMC,
 	    bTagDiscriminators=(bTagDiscriminators + ([] if NOTADDHBBTag else ['pfBoostedDoubleSecondaryVertexCA15BJetTags'])),
 	    JETCorrPayload='AK8PFPuppi',JETCorrLevels=jetCorrectionLevelsPuppi,
 	    subJETCorrPayload='AK4PFPuppi',subJETCorrLevels=jetCorrectionLevelsPuppi,
@@ -493,7 +510,7 @@ process.tree.CA15PuppijecUncName   = cms.string(AK8PuppiJECUncTextFile)
 process.tree.fillCA15PuppiJetInfo  = cms.bool(False)
 
 process.tree.THINJets = cms.InputTag("appliedRegJets")
-process.tree.FATJets       = cms.InputTag("selectedUpdatedPatJets")#("slimmedJetsAK8")
+process.tree.FATJets       = cms.InputTag("selectedUpdatedPatJetsAK8WithParticleNet")#("slimmedJetsAK8")
 process.tree.FATJetsForPrunedMass       = cms.InputTag("slimmedJetsAK8")
 process.tree.AK4PuppiJets  = cms.InputTag("slimmedJetsPuppi")
 

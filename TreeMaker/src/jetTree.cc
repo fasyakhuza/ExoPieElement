@@ -678,6 +678,10 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
       jetTau3_.push_back(jet->userFloat("NjettinessAK8Puppi:tau3"));
       jetTau4_.push_back(jet->userFloat("NjettinessAK8Puppi:tau4"));
 
+
+      // particleNet
+      jet_particleNet_.push_back(jet->bDiscriminator("pfMassDecorrelatedParticleNetDiscriminatorsJetTags:XbbvsQCD"));      
+
       // deep DoubleB tagger
 
       jet_probQCDb_.push_back(jet->bDiscriminator("pfMassIndependentDeepDoubleBvLJetTags:probQCD"));
@@ -1008,6 +1012,9 @@ jetTree::SetBranches(){
     }
 
     if (isFATJet_){
+
+      AddBranch(&jet_particleNet_,"jet_particleNet");
+
       AddBranch(&jet_DoubleSV_,"jet_DoubleSV");
       AddBranch(&jet_probQCDb_,"jet_probQCDb");
       AddBranch(&jet_probHbb_,"jet_probHbb");
@@ -1198,6 +1205,8 @@ jetTree::Clear(){
   ECF_2_3_10.clear();
   ECF_1_2_10.clear();
 
+  // particleNet
+  jet_particleNet_.clear();
 
   //jet  Hbb tagger for fat and add jet
   jet_probQCDb_.clear();
