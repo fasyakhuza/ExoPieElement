@@ -121,16 +121,9 @@ process.source = cms.Source("PoolSource",
 
 
 from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
+from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetJetTagsAll as pfParticleNetJetTagsAll
 
-updateJetCollection(
-   process,
-   jetSource = cms.InputTag('slimmedJetsAK8'), ## output will be selectedUpdatedPatJets
-   pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'),
-   svSource = cms.InputTag('slimmedSecondaryVertices'),
-   rParam = 0.8,
-   #jetCorrections = ('AK8PFchs', cms.vstring(['L2Relative', 'L3Absolute']), 'None'),
-   jetCorrections = ('AK8PFPuppi', cms.vstring(['L2Relative', 'L3Absolute','L2L3Residual']), 'None'),
-   btagDiscriminators = [
+update_btagDiscriminators = [
       'pfBoostedDoubleSecondaryVertexAK8BJetTags',
 #      'pfDeepDoubleBJetTags:probQ',
 #      'pfDeepDoubleBJetTags:probH',
@@ -154,21 +147,21 @@ updateJetCollection(
       'pfMassDecorrelatedDeepBoostedDiscriminatorsJetTags:WvsQCD',
       'pfMassDecorrelatedDeepBoostedDiscriminatorsJetTags:ZHbbvsQCD',
       ]
-        )
 
-## adding particleNet
-from RecoBTag.ONNXRuntime.pfParticleNet_cff import _pfParticleNetJetTagsAll as pfParticleNetJetTagsAll
+update_btagDiscriminators += pfParticleNetJetTagsAll
+
 updateJetCollection(
-    process,
-    jetSource = cms.InputTag('selectedUpdatedPatJets'),
-    pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'),
-    svSource = cms.InputTag('slimmedSecondaryVertices'),
-    rParam = 0.8,
-    jetCorrections = ('AK8PFPuppi', cms.vstring(['L2Relative', 'L3Absolute', 'L2L3Residual']), 'None'),
-    btagDiscriminators = pfParticleNetJetTagsAll,
-    postfix='AK8WithParticleNet',
-    printWarning = False
-   )
+   process,
+   jetSource = cms.InputTag('slimmedJetsAK8'), ## output will be selectedUpdatedPatJets
+   pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'),
+   svSource = cms.InputTag('slimmedSecondaryVertices'),
+   rParam = 0.8,
+   #jetCorrections = ('AK8PFchs', cms.vstring(['L2Relative', 'L3Absolute']), 'None'),
+   jetCorrections = ('AK8PFPuppi', cms.vstring(['L2Relative', 'L3Absolute','L2L3Residual']), 'None'),
+   btagDiscriminators = update_btagDiscriminators,
+   postfix='AK8WithParticleNet',
+   printWarning = False
+)
 
 
 
