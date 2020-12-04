@@ -84,7 +84,7 @@ elif options.runOn2016:
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1000)
 )
 
 ## New from Egamma
@@ -102,7 +102,8 @@ testFile=""
 # Input source
 if options.runOn2017:
     if options.runOnMC:
-        testFile='/store/mc/RunIIFall17MiniAODv2/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/70000/FED523F4-C856-E811-8AA7-0025905A60D6.root'
+#        testFile='/store/mc/RunIIFall17MiniAODv2/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/70000/FED523F4-C856-E811-8AA7-0025905A60D6.root'
+        testFile='/store/mc/RunIIFall17MiniAODv2/TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/00000/0037F121-7BB9-E811-A732-0242AC130002.root'
     else:
         testFile='/store/data/Run2017B/MET/MINIAOD/31Mar2018-v1/100000/16963797-0937-E811-ABE2-008CFAE45134.root'
 elif options.runOn2016:
@@ -485,7 +486,7 @@ process.jetCorrSequenceForPrunedMass = cms.Sequence( process.patJetCorrFactorsRe
 
 
 process.load('ExoPieElement.TreeMaker.TreeMaker_cfi')
-process.tree.runOnSignal           = cms.bool(options.runOnSignal)
+#process.tree.runOnSignal           = cms.bool(options.runOnSignal)
 process.tree.useJECText            = cms.bool(options.useJECText)
 process.tree.runOn2017             = cms.bool(options.runOn2017)
 process.tree.runOn2016             = cms.bool(options.runOn2016)
