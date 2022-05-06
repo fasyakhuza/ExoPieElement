@@ -191,6 +191,10 @@ genInfoTree::Fill(const edm::Event& iEvent)
     genParPz_.push_back(geni->pz());
     genParE_.push_back(geni->energy());
 
+    genParVtxX_.push_back(geni->vx());
+    genParVtxY_.push_back(geni->vy());
+    genParVtxZ_.push_back(geni->vz());
+
     genParQ_.push_back(geni->charge());
     genParId_.push_back(geni->pdgId());
     genParSt_.push_back(geni->status());
@@ -339,6 +343,10 @@ genInfoTree::SetBranches(){
   AddBranch(&pdfscaleSysWgtID_, "pdfscaleSysWgtID_");
   AddBranch(&pdfscaleSysWeights_, "pdfscaleSysWeights");
 
+  AddBranch(&genParVtxX_, "genParVtxX");
+  AddBranch(&genParVtxY_, "genParVtxY");
+  AddBranch(&genParVtxZ_, "genParVtxZ");
+
   if (gen_extra){
     AddBranch(&genParIndex_,"genParIndex");
     AddBranch(&genParQ_,"genParQ");
@@ -395,6 +403,11 @@ genInfoTree::Clear(){
   genParPy_.clear();
   genParPz_.clear();
   genParE_.clear();
+
+  genParVtxX_.clear();
+  genParVtxY_.clear();
+  genParVtxZ_.clear();
+
 
   genParQ_.clear();
   genParId_.clear();

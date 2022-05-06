@@ -99,23 +99,16 @@ class hpstauInfo : public baseTree{
   std::vector<bool> disc_byVTightIsolationMVArun2v1DBnewDMwLT;
   std::vector<bool> disc_byVVTightIsolationMVArun2v1DBnewDMwLT;
 
-  std::vector<bool> disc_byIsolationMVArun2017v2DBoldDMwLTraw2017;
-  std::vector<bool> disc_byVVLooseIsolationMVArun2017v2DBoldDMwLT2017;
-  std::vector<bool> disc_byVLooseIsolationMVArun2017v2DBoldDMwLT2017;
-  std::vector<bool> disc_byLooseIsolationMVArun2017v2DBoldDMwLT2017;
-  std::vector<bool> disc_byMediumIsolationMVArun2017v2DBoldDMwLT2017;
-  std::vector<bool> disc_byTightIsolationMVArun2017v2DBoldDMwLT2017;
-  std::vector<bool> disc_byVTightIsolationMVArun2017v2DBoldDMwLT2017;
-  std::vector<bool> disc_byVVTightIsolationMVArun2017v2DBoldDMwLT2017;
-  // 2017 v2 new DM
-  std::vector<bool> disc_byIsolationMVArun2017v2DBnewDMwLTraw2017;
-  std::vector<bool> disc_byVVLooseIsolationMVArun2017v2DBnewDMwLT2017;
-  std::vector<bool> disc_byVLooseIsolationMVArun2017v2DBnewDMwLT2017;
-  std::vector<bool> disc_byLooseIsolationMVArun2017v2DBnewDMwLT2017;
-  std::vector<bool> disc_byMediumIsolationMVArun2017v2DBnewDMwLT2017;
-  std::vector<bool> disc_byTightIsolationMVArun2017v2DBnewDMwLT2017;
-  std::vector<bool> disc_byVTightIsolationMVArun2017v2DBnewDMwLT2017;
-  std::vector<bool> disc_byVVTightIsolationMVArun2017v2DBnewDMwLT2017;
+  // deeptau
+  std::vector<float> disc_byDeepTau2017v2p1VSjetraw;
+  std::vector<bool> disc_byVVVLooseDeepTau2017v2p1VSjet;
+  std::vector<bool> disc_byVVLooseDeepTau2017v2p1VSjet;
+  std::vector<bool> disc_byVLooseDeepTau2017v2p1VSjet;
+  std::vector<bool> disc_byLooseDeepTau2017v2p1VSjet;
+  std::vector<bool> disc_byMediumDeepTau2017v2p1VSjet;
+  std::vector<bool> disc_byTightDeepTau2017v2p1VSjet;
+  std::vector<bool> disc_byVTightDeepTau2017v2p1VSjet;
+  std::vector<bool> disc_byVVTightDeepTau2017v2p1VSjet;
 
 
   std::vector<bool> disc_byLooseCombinedIsolationDeltaBetaCorr3Hits;

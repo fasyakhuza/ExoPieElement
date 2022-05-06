@@ -74,8 +74,6 @@ jetTree::jetTree(std::string desc, TTree* tree, const edm::ParameterSet& iConfig
         if (desc.find("CA15Puppi")!=std::string::npos)
                 isCA15PuppiJet_=true;
 
-        std::cout << " inside jet tree "<< desc << std::endl;
-
 
         //genjetP4_    = new TClonesArray("TLorentzVector");
         //jetP4_       = new TClonesArray("TLorentzVector");
@@ -111,7 +109,6 @@ jetTree::jetTree(std::string desc, TTree* tree, const edm::ParameterSet& iConfig
 
         } // if it's FATjet
 
-        std::cout<<" before ca15 "<<std::endl;
         if(isCA15PuppiJet_) {
                 /* ECF: Starts here */
                 jetDefCA = new fastjet::JetDefinition(fastjet::cambridge_algorithm, radius);
@@ -139,7 +136,6 @@ jetTree::jetTree(std::string desc, TTree* tree, const edm::ParameterSet& iConfig
                 mJetBoostedBtaggingMVACalc.initialize("BDT",fweight);
         } // if it's CA15Puppijet
 
-        std::cout<<" after ca15 dbt "<<std::endl;
         if(useJECText_)
         {
                 std::vector<JetCorrectorParameters> vPar;
@@ -165,7 +161,7 @@ jetTree::jetTree(std::string desc, TTree* tree, const edm::ParameterSet& iConfig
         std::string cmssw_base = getenv("CMSSW_BASE");
         //std::vector<JetCorrectionUncertainty*> vsrc(nsrc);
         if (runOn2016_) {
-                std::string JecSourceUncFile = cmssw_base+"/src/ExoPieElement/TreeMaker/data/RegroupedV2_Summer16_07Aug2017_V11_MC_UncertaintySources_AK4PFchs.txt";
+                std::string JecSourceUncFile = cmssw_base+"/src/ExoPieElement/TreeMaker/data/RegroupedV2_Summer19UL16APV_V7_MC_UncertaintySources_AK4PFchs.txt";
                 total = new JetCorrectionUncertainty(*(new JetCorrectorParameters(JecSourceUncFile, "Total")));
                 for (int isrc = 0; isrc < nsrc; isrc++) {
                         const char *name = srcnames_2016[isrc];
@@ -176,7 +172,7 @@ jetTree::jetTree(std::string desc, TTree* tree, const edm::ParameterSet& iConfig
         };
 
         if (runOn2017_) {
-                std::string JecSourceUncFile = cmssw_base+"/src/ExoPieElement/TreeMaker/data/RegroupedV2_Fall17_17Nov2017_V32_MC_UncertaintySources_AK4PFchs.txt";
+	    std::string JecSourceUncFile = cmssw_base+"/src/ExoPieElement/TreeMaker/data/RegroupedV2_Summer19UL17_V5_MC_UncertaintySources_AK4PFchs.txt";
                 total = new JetCorrectionUncertainty(*(new JetCorrectorParameters(JecSourceUncFile, "Total")));
                 for (int isrc = 0; isrc < nsrc; isrc++) {
                         const char *name = srcnames_2017[isrc];
@@ -186,7 +182,7 @@ jetTree::jetTree(std::string desc, TTree* tree, const edm::ParameterSet& iConfig
                 };
         };
         if (runOn2018_) {
-                std::string JecSourceUncFile = cmssw_base+"/src/ExoPieElement/TreeMaker/data/RegroupedV2_Autumn18_V19_MC_UncertaintySources_AK4PFchs.txt";
+                std::string JecSourceUncFile = cmssw_base+"/src/ExoPieElement/TreeMaker/data/RegroupedV2_Summer19UL18_V5_MC_UncertaintySources_AK4PFchs.txt";
                 total = new JetCorrectionUncertainty(*(new JetCorrectorParameters(JecSourceUncFile, "Total")));
                 for (int isrc = 0; isrc < nsrc; isrc++) {
                         const char *name = srcnames_2018[isrc];
@@ -195,7 +191,6 @@ jetTree::jetTree(std::string desc, TTree* tree, const edm::ParameterSet& iConfig
                         vsrc.push_back(unc);//vsrc[isrc] = unc;
                 };
         };
-        std::cout<<" after jec "<<std::endl;
 }
 
 
@@ -307,6 +302,51 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
 
                 nJet_++;
                 //Stuff common for all jets.
+		// 
+		unsigned int nTracks = 0;
+		std::vector<int>   jetIndex;
+		std::vector<int>   TrkPID;
+		std::vector<float> TrkPt;
+		std::vector<float> TrkEta;
+		std::vector<float> TrkPhi;
+		std::vector<float> TrkE;
+		std::vector<float> TrkImpdz;
+		std::vector<float> TrkImpdzError;
+		std::vector<float> TrkImpdxy;
+		std::vector<float> TrkImpdxyError;           
+		
+		std::vector daus(jet->daughterPtrVector());
+		std::sort(daus.begin(), daus.end(), [](const reco::CandidatePtr &p1, const reco::CandidatePtr &p2) { return p1->pt() > p2->pt(); });
+		for (unsigned int i2 = 0; i2< daus.size(); ++i2) {
+		  const pat::PackedCandidate &pfcand = dynamic_cast<const pat::PackedCandidate &>(*daus[i2]);
+		  int charge = pfcand.charge();
+		  if (charge!=0 and pfcand.pt()>0.0 and pfcand.hasTrackDetails()){
+		    nTracks++;
+		    jetIndex.push_back(nJet_-1);
+		    TrkPID.push_back(pfcand.pdgId());
+		    TrkPt.push_back(pfcand.pt());
+		    TrkEta.push_back(pfcand.eta());
+		    TrkPhi.push_back(pfcand.phi());
+		    TrkE.push_back(pfcand.energy());						      
+		    TrkImpdz.push_back(pfcand.dz());
+		    TrkImpdxy.push_back(pfcand.dxy());
+		    TrkImpdzError.push_back(pfcand.dzError());
+		    TrkImpdxyError.push_back(pfcand.dxyError());
+		  } // if this is a charged jet daughter
+		} // end of checking jet constituents
+			
+
+		jetNTracks_.push_back(nTracks);
+		jetIndex_.push_back(jetIndex);
+		jetTrackPID_.push_back(TrkPID);
+		jetTrackPt_.push_back(TrkPt);
+		jetTrackEta_.push_back(TrkEta);
+		jetTrackPhi_.push_back(TrkPhi);
+		jetTrackE_.push_back(TrkE);
+		jetTrackImpdz_.push_back(TrkImpdz);
+		jetTrackImpdzError_.push_back(TrkImpdzError);       
+		jetTrackImpdxy_.push_back(TrkImpdxy);
+		jetTrackImpdxyError_.push_back(TrkImpdxyError);      
 
 
                 if (jet->genJet()) {
@@ -449,7 +489,6 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
                         std::vector<float> temp_uncer;
                         temp_uncer.clear();
                         for (int isrc = 0; isrc < nsrc; isrc++) {
-
                                 unc = vsrc[isrc];
                                 unc->setJetPt(jet->pt());
                                 unc->setJetEta(jet->eta());
@@ -480,6 +519,7 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
                         isPUJetIDLoose_.push_back(bool(jet->userInt("pileupJetId:fullId") & (1 << 2)));
                         isPUJetIDMedium_.push_back(bool(jet->userInt("pileupJetId:fullId") & (1 << 1)));
                         isPUJetIDTight_.push_back(bool(jet->userInt("pileupJetId:fullId") & (1 << 0)));
+
                 }
 
                 if(isTHINJet_) {
@@ -500,7 +540,55 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
                         jetCMulti_.push_back(jet->userFloat("CHM_"));
                         jetNMultiplicity_.push_back(jet->userFloat("NumNeutralParticles_"));
 
-                }
+			// displaced tracks
+			/*
+			unsigned int nTracks = 0;
+			std::vector<int>   jetIndex;
+			std::vector<int>   TrkPID;
+			std::vector<float> TrkPt;
+			std::vector<float> TrkEta;
+			std::vector<float> TrkPhi;
+			std::vector<float> TrkE;
+			std::vector<float> TrkImpdz;
+			std::vector<float> TrkImpdzError;
+			std::vector<float> TrkImpdxy;
+			std::vector<float> TrkImpdxyError;           
+		
+			std::vector daus(jet->daughterPtrVector());
+			std::sort(daus.begin(), daus.end(), [](const reco::CandidatePtr &p1, const reco::CandidatePtr &p2) { return p1->pt() > p2->pt(); });
+			for (unsigned int i2 = 0; i2< daus.size(); ++i2) {
+			  const pat::PackedCandidate &pfcand = dynamic_cast<const pat::PackedCandidate &>(*daus[i2]);
+			  int charge = pfcand.charge();
+			  if (charge!=0 and pfcand.pt()>0.0 and pfcand.hasTrackDetails()){
+			    nTracks++;
+			    jetIndex.push_back(nJet_-1);
+			    TrkPID.push_back(pfcand.pdgId());
+			    TrkPt.push_back(pfcand.pt());
+			    TrkEta.push_back(pfcand.eta());
+			    TrkPhi.push_back(pfcand.phi());
+			    TrkE.push_back(pfcand.energy());						      
+			    TrkImpdz.push_back(pfcand.dz());
+			    TrkImpdxy.push_back(pfcand.dxy());
+			    TrkImpdzError.push_back(pfcand.dzError());
+			    TrkImpdxyError.push_back(pfcand.dxyError());
+			  } // if this is a charged jet daughter
+			} // end of checking jet constituents
+			
+
+			jetNTracks_.push_back(nTracks);
+			jetIndex_.push_back(jetIndex);
+			jetTrackPID_.push_back(TrkPID);
+			jetTrackPt_.push_back(TrkPt);
+			jetTrackEta_.push_back(TrkEta);
+			jetTrackPhi_.push_back(TrkPhi);
+			jetTrackE_.push_back(TrkE);
+			jetTrackImpdz_.push_back(TrkImpdz);
+			jetTrackImpdzError_.push_back(TrkImpdzError);       
+			jetTrackImpdxy_.push_back(TrkImpdxy);
+			jetTrackImpdxyError_.push_back(TrkImpdxyError);      
+			*/
+                } // if this is a THINJet
+
                 if(!isTHINJet_) {
                         if (runOn2016_) {
                                 std::map<std::string, bool> Pass = jet2017ID_.LooseJetCut_2016(*jet);
@@ -656,7 +744,7 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
                         float tau_vertexMass_1_              = vars.get(reco::btau::tau2_vertexMass);
                         float tau_vertexEnergyRatio_1_       = vars.get(reco::btau::tau2_vertexEnergyRatio);
                         float tau_flightDistance2dSig_1_     = vars.get(reco::btau::tau2_flightDistance2dSig);
-                        float jetNTracks_                    = vars.get(reco::btau::jetNTracks);
+                        float jetnTracks_                    = vars.get(reco::btau::jetNTracks);
                         float nSV_                           = vars.get(reco::btau::jetNSecondaryVertices);
                         float massPruned_                    = jet->p4().mass();//jet->m;
                         float flavour_                       = -1;//j.partonFlavor();   // they're spectator variables
@@ -705,7 +793,7 @@ jetTree::Fill(const edm::Event& iEvent, edm::EventSetup const& iSetup){
                                 tau_vertexMass_1_,
                                 tau_vertexEnergyRatio_1_,
                                 tau_flightDistance2dSig_1_,
-                                jetNTracks_,
+                                jetnTracks_,
                                 nSV_,
                                 false
                                 );
@@ -1000,6 +1088,21 @@ jetTree::SetBranches(){
         AddBranch(&genjetpz_,"genjetpz");
         AddBranch(&genjetE_,"genjetE");
 
+
+	// displaced tracks
+	AddBranch(&jetNTracks_,  "jetNTracks");
+	AddBranch(&jetIndex_,    "jetIndex");
+	AddBranch(&jetTrackPID_, "jetTrackPID");
+	AddBranch(&jetTrackPt_,  "jetTrackPt");
+	AddBranch(&jetTrackEta_, "jetTrackEta");
+	AddBranch(&jetTrackPhi_, "jetTrackPhi");
+	AddBranch(&jetTrackE_,   "jetTrackE");
+	AddBranch(&jetTrackImpdz_,"jetTrackImpdz");
+	AddBranch(&jetTrackImpdzError_, "jetTrackImpdzError"); 
+	AddBranch(&jetTrackImpdxy_,"jetTrackImpdxy");
+	AddBranch(&jetTrackImpdxyError_,"jetTrackImpdxyError");      
+
+
         if(jet_extra) {
                 //AddBranch(&jetP4_,       "jetP4");
                 //AddBranch(&genjetP4_,   "genjetP4"); // this is no longer needed as individual component is already there,
@@ -1057,6 +1160,19 @@ jetTree::SetBranches(){
                 AddBranch(&isPUJetIDTight_,  "isPUJetIDTight");
                 AddBranch(&bRegNNCorr_,"bRegNNCorr");
                 AddBranch(&bRegNNResolution_,"bRegNNResolution");
+
+		// // displaced tracks
+		// AddBranch(&jetNTracks_,  "jetNTracks");
+		// AddBranch(&jetIndex_,    "jetIndex");
+		// AddBranch(&jetTrackPID_, "jetTrackPID");
+		// AddBranch(&jetTrackPt_,  "jetTrackPt");
+		// AddBranch(&jetTrackEta_, "jetTrackEta");
+		// AddBranch(&jetTrackPhi_, "jetTrackPhi");
+		// AddBranch(&jetTrackE_,   "jetTrackE");
+		// AddBranch(&jetTrackImpdz_,"jetTrackImpdz");
+		// AddBranch(&jetTrackImpdzError_, "jetTrackImpdzError"); 
+		// AddBranch(&jetTrackImpdxy_,"jetTrackImpdxy");
+		// AddBranch(&jetTrackImpdxyError_,"jetTrackImpdxyError");      
         }
 
         if(isFATJet_ || isAK8PuppiJet_ || isCA15PuppiJet_) {
@@ -1192,6 +1308,18 @@ jetTree::Clear(){
         bRegNNCorr_.clear();
         bRegNNResolution_.clear();
         //Energy Fraction and Multiplicity
+
+	jetNTracks_.clear();
+	jetIndex_.clear();
+	jetTrackPID_.clear();
+	jetTrackPt_.clear();
+	jetTrackEta_.clear();
+	jetTrackPhi_.clear();
+	jetTrackE_.clear();
+	jetTrackImpdz_.clear();
+	jetTrackImpdzError_.clear();                                          
+ 	jetTrackImpdxy_.clear();
+	jetTrackImpdxyError_.clear();      
 
         jetCEmEF_.clear();
         jetCHadEF_.clear();

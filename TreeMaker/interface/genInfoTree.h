@@ -94,6 +94,9 @@ class genInfoTree : public baseTree{
   std::vector<float> genParPz_;
   std::vector<float> genParE_;
 
+  std::vector<float> genParVtxX_;
+  std::vector<float> genParVtxY_;
+  std::vector<float> genParVtxZ_;
 
   std::vector<int>   genParQ_;
   std::vector<int>   genParId_;

@@ -35,7 +35,7 @@ options.register ('useMiniAOD',
 		    "useMiniAOD")
 
 options.register ('runOn2017',
-		  False,
+		  True,
 		  VarParsing.multiplicity.singleton,
 		  VarParsing.varType.bool,
 		  "runOn2017")
@@ -46,12 +46,24 @@ options.register ('runOn2016',
 		  VarParsing.varType.bool,
 		  "runOn2016")
 
+options.register ('runOnrp2HDM',
+		  False,
+		  VarParsing.multiplicity.singleton,
+		  VarParsing.varType.bool,
+		  "runOnrp2HDM")
+
+options.register ('runOnrpZpB',
+                  False,
+                  VarParsing.multiplicity.singleton,
+                  VarParsing.varType.bool,
+                  "runOnrpZpB")
+
 options.parseArguments()
 
 
-
-MCJEC='Summer16_23Sep2016V3_MC'
-DATAJEC='Summer16_23Sep2016'+options.period+'V3_DATA'
+MCJEC='Summer19UL17_V5_MC'
+DATAJEC='Summer19UL17_Run'+options.period+'_V5_DATA'
+#DATAJEC='Summer19UL16_Run'+options.period+'_V7_DATA'
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -68,18 +80,18 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 #taken from https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVAnalysisSummaryTable
 if options.runOn2017:
     if options.runOnMC:
-        process.GlobalTag.globaltag='94X_mc2017_realistic_v17'
+        process.GlobalTag.globaltag='106X_mc2017_realistic_v9'
     else:
-        process.GlobalTag.globaltag='94X_dataRun2_v11'
+        process.GlobalTag.globaltag='106X_dataRun2_v35'
 elif options.runOn2016:
     if options.runOnMC:
-        process.GlobalTag.globaltag='94X_mcRun2_asymptotic_v3'
+        process.GlobalTag.globaltag='106X_mcRun2_asymptotic_v17'
     else:
-        process.GlobalTag.globaltag='94X_dataRun2_v10'
+        process.GlobalTag.globaltag='106X_dataRun2_v35'
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(100)
 )
 
 ## New from Egamma
@@ -93,24 +105,27 @@ setupEgammaPostRecoSeq(process,
                        era='2017-Nov17ReReco')  #era is new to select between 2016 / 2017,  it defaults to 2017
 
 
+testFile=""
 # Input source
 if options.runOn2017:
-	if options.runOnMC:
-		testFile='/store/mc/RunIIFall17MiniAODv2/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/70000/FED523F4-C856-E811-8AA7-0025905A60D6.root'
-	else:
-		testFile='/store/data/Run2017B/MET/MINIAOD/31Mar2018-v1/100000/16963797-0937-E811-ABE2-008CFAE45134.root'
+    if options.runOnMC:
+#        testFile='/store/mc/RunIIFall17MiniAODv2/MonoHTobb_ZpBaryonic_TuneCP2_13TeV_madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/100000/0421C1AF-FAFF-EA11-BA81-0CC47AFF0640.root'#'/store/mc/RunIIFall17MiniAODv2/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/70000/FED523F4-C856-E811-8AA7-0025905A60D6.root'
+     #   testFile='file:/afs/cern.ch/work/f/fkhuzaim/public/MINIAOD_output/step_miniaod_2.root'
+        testFile='file:/afs/cern.ch/work/f/fkhuzaim/public/MINIAOD_output/step_miniaod_10.root'
+    else:
+        testFile='/store/data/Run2017B/MET/MINIAOD/31Mar2018-v1/100000/16963797-0937-E811-ABE2-008CFAE45134.root'
 elif options.runOn2016:
-	if options.runOnMC:
-		testFile='/store/mc/RunIISummer16MiniAODv3/DYJetsToLL_M-50_HT-70to100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v2/110000/FC23A1C1-1BEA-E811-9671-0025905C445A.root'
-	else:
-		testFile='/store/data/Run2016B/MET/MINIAOD/17Jul2018_ver2-v1/40000/FE78E8B0-288C-E811-81FC-0025904CDDF8.root'
+    if options.runOnMC:
+        testFile='/store/mc/RunIIFall17MiniAODv2/bbDM_2HDMa_LO_5f_TuneCP3_13TeV_madgraph_pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/120000/00EC94C6-59F9-EA11-A069-000D3AB6FB6B.root'
+    else:
+        testFile='/store/data/Run2016B/MET/MINIAOD/17Jul2018_ver2-v1/40000/FE78E8B0-288C-E811-81FC-0025904CDDF8.root'
 
 
 process.source = cms.Source("PoolSource",
                             secondaryFileNames = cms.untracked.vstring(),
                             #fileNames = cms.untracked.vstring("file:/tmp/khurana/temp.root"),
 							fileNames = cms.untracked.vstring(testFile),
-							#skipEvents = cms.untracked.uint32(0)
+                            skipEvents = cms.untracked.uint32(100)
                             )
 
 
@@ -122,12 +137,12 @@ updateJetCollection(
    pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'),
    svSource = cms.InputTag('slimmedSecondaryVertices'),
    rParam = 0.8,
-   #jetCorrections = ('AK8PFchs', cms.vstring(['L2Relative', 'L3Absolute']), 'None'),
+#   jetCorrections = ('AK8PFchs', cms.vstring(['L2Relative', 'L3Absolute']), 'None'),
    jetCorrections = ('AK8PFPuppi', cms.vstring(['L2Relative', 'L3Absolute','L2L3Residual']), 'None'),
    btagDiscriminators = [
       'pfBoostedDoubleSecondaryVertexAK8BJetTags',
-      'pfDeepDoubleBJetTags:probQ',
-      'pfDeepDoubleBJetTags:probH',
+#      'pfDeepDoubleBJetTags:probQ',
+#      'pfDeepDoubleBJetTags:probH',
       'pfDeepDoubleBvLJetTags:probQCD',
       'pfDeepDoubleBvLJetTags:probHbb',
       'pfDeepDoubleCvLJetTags:probQCD',
@@ -151,6 +166,27 @@ updateJetCollection(
         )
 ## This is for modified MET, needed only for 2017 data
 if options.runOn2017:
+
+    process.load('RecoMET.METFilters.ecalBadCalibFilter_cfi')
+    baddetEcallist = cms.vuint32([872439604,872422825,872420274,872423218,
+     872423215,872416066,872435036,872439336,
+     872420273,872436907,872420147,872439731,
+     872436657,872420397,872439732,872439339,
+     872439603,872422436,872439861,872437051,
+     872437052,872420649,872422436,872421950,
+     872437185,872422564,872421566,872421695,
+     872421955,872421567,872437184,872421951,
+     872421694,872437056,872437057,872437313])
+
+
+    process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter("EcalBadCalibFilter",
+      EcalRecHitSource = cms.InputTag("reducedEgamma:reducedEERecHits"),
+      ecalMinEt        = cms.double(50.),
+      baddetEcal    = baddetEcallist,
+      taggingMode = cms.bool(True),
+      debug = cms.bool(False)
+      )
+
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
     runMetCorAndUncFromMiniAOD (
         process,
@@ -315,13 +351,14 @@ from JMEAnalysis.JetToolbox.jetToolbox_cff import jetToolbox
 
 ### CA15Puppi
 ### do we still need this? I guess no.
-jetToolbox( process, 'ca15', 'jetSequence', 'out', PUMethod='Puppi', miniAOD=options.useMiniAOD, runOnMC=options.runOnMC,
-	    bTagDiscriminators=(bTagDiscriminators + ([] if NOTADDHBBTag else ['pfBoostedDoubleSecondaryVertexCA15BJetTags'])),
-	    JETCorrPayload='AK8PFPuppi',JETCorrLevels=jetCorrectionLevelsPuppi,
-	    subJETCorrPayload='AK4PFPuppi',subJETCorrLevels=jetCorrectionLevelsPuppi,
-	    Cut='pt>120',
-	    addSoftDrop=True,addSoftDropSubjets=True, betaCut=1.0, zCutSD=0.15,
-	    addNsub=True )
+jetToolbox( process, 'ca15', 'jetSequence', 'out', PUMethod='Puppi', dataTier='miniAOD', runOnMC=options.runOnMC,
+            bTagDiscriminators=(bTagDiscriminators + ([] if NOTADDHBBTag else ['pfBoostedDoubleSecondaryVertexCA15BJetTags'])),
+            JETCorrPayload='AK8PFPuppi',JETCorrLevels=jetCorrectionLevelsPuppi,
+            subJETCorrPayload='AK4PFPuppi',subJETCorrLevels=jetCorrectionLevelsPuppi,
+            Cut='pt>120',
+            addSoftDrop=True,addSoftDropSubjets=True, betaCut=1.0, zCutSD=0.15,
+            addNsub=True )
+
 
 
 ## Jet Energy Resolution
@@ -366,13 +403,14 @@ process.patSmearedJets = cms.EDProducer("SmearedPATJetProducer",
 
 
 ## Tau ID embedding
+updatedTauName = "slimmedTausNewID" #name of pat::Tau collection with new tau-Ids
+import RecoTauTag.RecoTau.tools.runTauIdMVA as tauIdConfig
+tauIdEmbedder = tauIdConfig.TauIDEmbedder(process, cms, debug = False,
+                    updatedTauName = updatedTauName,
+                    toKeep = ["deepTau2017v2p1", #deepTau TauIDs
+                               ])
+tauIdEmbedder.runTauID()
 
-from ExoPieElement.TreeMaker.runTauIdMVA import *
-na = TauIDEmbedder(process, cms,
-		   debug=True,
-		   toKeep = ["2017v2"]
-		   )
-na.runTauID()
 
 ## adding payloads for Tau ID discriminator
 
@@ -448,6 +486,8 @@ process.jetCorrSequenceForPrunedMass = cms.Sequence( process.patJetCorrFactorsRe
 
 
 process.load('ExoPieElement.TreeMaker.TreeMaker_cfi')
+process.tree.runOnrp2HDM           = cms.bool(options.runOnrp2HDM)
+process.tree.runOnrpZpB            = cms.bool(options.runOnrpZpB)
 process.tree.useJECText            = cms.bool(options.useJECText)
 process.tree.runOn2017             = cms.bool(options.runOn2017)
 process.tree.runOn2016             = cms.bool(options.runOn2016)
@@ -462,18 +502,35 @@ process.tree.AK8PuppijecNames      = cms.vstring(AK8PuppiJECTextFiles)
 process.tree.AK8PuppijecUncName    = cms.string(AK8PuppiJECUncTextFile)
 process.tree.CA15PuppijecNames     = cms.vstring(AK8PuppiJECTextFiles)
 process.tree.CA15PuppijecUncName   = cms.string(AK8PuppiJECUncTextFile)
-process.tree.fillCA15PuppiJetInfo  = cms.bool(True)
+process.tree.fillCA15PuppiJetInfo  = cms.bool(False)
+process.tree.fillJetInfo           = cms.bool(True)
+process.tree.fillFATJetInfo        = cms.bool(True) 
+  
+
+process.tree.THINJets = cms.InputTag("appliedRegJets")
+process.tree.FATJets       = cms.InputTag("selectedUpdatedPatJets")#("slimmedJetsAK8")
+process.tree.FATJetsForPrunedMass       = cms.InputTag("slimmedJetsAK8")
+process.tree.AK4PuppiJets  = cms.InputTag("slimmedJetsPuppi")
+process.tree.tauLabel     = cms.untracked.InputTag("slimmedTausNewID")
+
 
 if options.runOn2016:
     process.tree.pfType1Met = cms.InputTag("slimmedMETs")
 if options.runOn2017:
+    if options.runOnMC:
+        process.tree.filterLabel = cms.InputTag("TriggerResults::PAT")
+    else:
+        process.tree.filterLabel = cms.InputTag("TriggerResults::RECO")
     process.tree.pfType1Met = cms.InputTag("slimmedMETsModifiedMET")
 
-if options.useJECText:
-	process.tree.THINJets      = cms.InputTag("patSmearedJets")
-	process.tree.FATJets       = cms.InputTag("selectedUpdatedPatJets")#("slimmedJetsAK8")
-	process.tree.FATJetsForPrunedMass       = cms.InputTag("slimmedJetsAK8")
-	process.tree.AK4PuppiJets  = cms.InputTag("slimmedJetsPuppi")
+#if options.useJECText:
+#    process.tree.THINJets      = cms.InputTag("patSmearedJets")
+#    process.tree.FATJets       = cms.InputTag("selectedUpdatedPatJets")#("slimmedJetsAK8")
+#    process.tree.FATJetsForPrunedMass       = cms.InputTag("slimmedJetsAK8")
+#    process.tree.AK4PuppiJets  = cms.InputTag("slimmedJetsPuppi")
+
+
+
 
 ## output file name
 process.TFileService = cms.Service("TFileService",fileName = cms.string("ExoPieElementTuples.root"))
@@ -481,6 +538,12 @@ process.TFileService = cms.Service("TFileService",fileName = cms.string("ExoPieE
 
 ##Trigger Filter
 if options.runOn2017:
+    from PhysicsTools.PatUtils.l1PrefiringWeightProducer_cfi import l1PrefiringWeightProducer
+    process.prefiringweight = l1PrefiringWeightProducer.clone(
+    DataEraECAL = cms.string("2017BtoF"), #Use 2016BtoH for 2016
+    UseJetEMPt = cms.bool(False),
+    PrefiringRateSystematicUnctyECAL = cms.double(0.2))
+
     process.trigFilter = cms.EDFilter('TrigFilter',
                                       TrigTag = cms.InputTag("TriggerResults::HLT"),
                                       TrigPaths = cms.vstring("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60",
@@ -490,14 +553,22 @@ if options.runOn2017:
                                                               "HLT_Ele32_WPTight_Gsf_L1DoubleEG",
                                                               "HLT_Ele32_WPTight_Gsf",
                                                               "HLT_Ele35_WPTight_Gsf",
+                                                              "HLT_Ele115_CaloIdVT_GsfTrkIdT",
+                                                              "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165",
                                                               "HLT_IsoMu24",
                                                               "HLT_IsoMu27",
                                                               "HLT_IsoTkMu27",
                                                               "HLT_IsoTkMu24",
-                                                              "HLT_Photon200" ),
+                                                              "HLT_Photon200",
+                                                              "HLT_Photon175"),
                                       isMC_ = cms.bool(options.runOnMC)
                                      )
 elif options.runOn2016:
+    from PhysicsTools.PatUtils.l1PrefiringWeightProducer_cfi import l1PrefiringWeightProducer
+    prefiringweight = l1PrefiringWeightProducer.clone(
+    DataEraECAL = cms.string("2016BtoH"), #Use 2016BtoH for 2016
+    UseJetEMPt = cms.bool(False),
+    PrefiringRateSystematicUnctyECAL = cms.double(0.2))
     process.trigFilter = cms.EDFilter('TrigFilter',
                                       TrigTag = cms.InputTag("TriggerResults::HLT"),
                                       TrigPaths = cms.vstring("HLT_PFMET170_BeamHaloCleaned",
@@ -537,30 +608,34 @@ process.appliedRegJets= cms.EDProducer('bRegressionProducer',
 if options.runOn2017:
 	if not options.useJECText:
 		process.analysis = cms.Path(
+			process.ecalBadCalibReducedMINIAODFilter*
 			process.trigFilter
+                        *process.prefiringweight
 			*process.rerunMvaIsolationSequence
-			*process.NewTauIDsEmbedded+
+                        *getattr(process,updatedTauName)+
 			process.egammaPostRecoSeq+
 			process.appliedRegJets+
 			process.fullPatMetSequenceModifiedMET+
-			process.patSmearedJets+
-			process.pfMet+
-			process.jetCorrSequenceAK4+  ## only when using JEC text files
-			process.jetCorrSequenceAK8+  ## only when using JEC text files
-			process.jetCorrSequenceAK4Puppi+ ## only when using JEC text files
-			process.jetCorrSequenceForPrunedMass+ ## only when using JEC text files
+			#process.patSmearedJets+
+			# process.pfMet+
 			process.tree
 			)
 	else:
 		process.analysis = cms.Path(
+			process.ecalBadCalibReducedMINIAODFilter*
 			process.trigFilter
+            *process.prefiringweight
 			*process.rerunMvaIsolationSequence
-			*process.NewTauIDsEmbedded+
+                        *getattr(process,updatedTauName)+
 			process.egammaPostRecoSeq+
 			process.appliedRegJets+
 			process.fullPatMetSequenceModifiedMET+
 			process.patSmearedJets+
-			process.pfMet+
+			process.jetCorrSequenceAK4+  ## only when using JEC text files
+			process.jetCorrSequenceAK8+  ## only when using JEC text files
+			process.jetCorrSequenceAK4Puppi+ ## only when using JEC text files
+			process.jetCorrSequenceForPrunedMass+ ## only when using JEC text files
+			# process.pfMet+
 			process.tree
 			)
 
@@ -568,27 +643,29 @@ elif options.runOn2016:
 	if not options.useJECText:
 		process.analysis = cms.Path(
 			process.trigFilter
+            *process.prefiringweight
 			*process.rerunMvaIsolationSequence
 			*process.NewTauIDsEmbedded+
 			process.egammaPostRecoSeq+
 			process.appliedRegJets+
-			process.patSmearedJets+
-			process.pfMet+
-			process.jetCorrSequenceAK4+  ## only when using JEC text files
-			process.jetCorrSequenceAK8+  ## only when using JEC text files
-			process.jetCorrSequenceAK4Puppi+ ## only when using JEC text files
-			process.jetCorrSequenceForPrunedMass+ ## only when using JEC text files
+			#process.patSmearedJets+
+			# process.pfMet+
 			process.tree
 			)
 	else:
 		process.analysis = cms.Path(
 			process.trigFilter
+            *process.prefiringweight
 			*process.rerunMvaIsolationSequence
 			*process.NewTauIDsEmbedded+
 			process.egammaPostRecoSeq+
 			process.appliedRegJets+
 			process.patSmearedJets+
-			process.pfMet+
+			process.jetCorrSequenceAK4+  ## only when using JEC text files
+			process.jetCorrSequenceAK8+  ## only when using JEC text files
+			process.jetCorrSequenceAK4Puppi+ ## only when using JEC text files
+			process.jetCorrSequenceForPrunedMass+ ## only when using JEC text files
+			# process.pfMet+
 			process.tree
 			)
 

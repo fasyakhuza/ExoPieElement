@@ -189,6 +189,21 @@ class jetTree  : public baseTree{
   std::vector<bool>  isPUJetIDMedium_;
   std::vector<bool>  isPUJetIDTight_;
 
+  // for displaced jets
+  std::vector<int>                jetNTracks_;
+  std::vector<std::vector<int>>   jetIndex_;
+  std::vector<std::vector<int>>   jetTrackPID_;
+  std::vector<std::vector<float>> jetTrackPt_;
+  std::vector<std::vector<float>> jetTrackEta_;
+  std::vector<std::vector<float>> jetTrackPhi_;
+  std::vector<std::vector<float>> jetTrackE_;
+  std::vector<std::vector<float>> jetTrackImpdz_;
+  std::vector<std::vector<float>> jetTrackImpdzError_;
+  std::vector<std::vector<float>> jetTrackImpdxy_;
+  std::vector<std::vector<float>> jetTrackImpdxyError_;
+
+
+
   //Energy Fraction and Multiplicity
 
   std::vector<float> jetCEmEF_;

@@ -16,7 +16,7 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('analysis')
 
 options.register ('runOnMC',
-		  False,
+		  True,
 		  VarParsing.multiplicity.singleton,
 		  VarParsing.varType.bool,
 		  "runOnMC")
@@ -47,7 +47,7 @@ options.register ('runOn2018',
                   "runOn2018")
 
 options.register ('runOn2017',
-		  False,
+		  True,
 		  VarParsing.multiplicity.singleton,
 		  VarParsing.varType.bool,
 		  "runOn2017")
@@ -78,9 +78,9 @@ options.register ('runOnrpZpB',
 options.parseArguments()
 
 
+MCJEC='Summer19UL18_V5_MC'
+DATAJEC='Summer19UL18_Run'+options.period+'_V5_DATA'
 
-MCJEC='Summer16_23Sep2016V3_MC'
-DATAJEC='Summer16_23Sep2016'+options.period+'V3_DATA'
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -97,28 +97,28 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 # Other statements
 if options.runOn2018:
     if options.runOnMC:
-        process.GlobalTag.globaltag='102X_upgrade2018_realistic_v20'
+        process.GlobalTag.globaltag='106X_upgrade2018_realistic_v16_L1v1'
     else:
 	print 'period',options.period
 	if options.period=="D":
-		process.GlobalTag.globaltag='102X_dataRun2_Prompt_v15'
+		process.GlobalTag.globaltag='106X_dataRun2_v35'
 	else:
-        	process.GlobalTag.globaltag='102X_dataRun2_v12'
+        	process.GlobalTag.globaltag='106X_dataRun2_v35'
 elif options.runOn2017:
     if options.runOnMC:
-        process.GlobalTag.globaltag='94X_mc2017_realistic_v17'
+        process.GlobalTag.globaltag='106X_mc2017_realistic_v9'
     else:
-        process.GlobalTag.globaltag='94X_dataRun2_v11'
+        process.GlobalTag.globaltag='106X_dataRun2_v35'
 elif options.runOn2016:
     if options.runOnMC:
-        process.GlobalTag.globaltag='94X_mcRun2_asymptotic_v3'
+        process.GlobalTag.globaltag='106X_mcRun2_asymptotic_v17'
     else:
-        process.GlobalTag.globaltag='94X_dataRun2_v10'
+        process.GlobalTag.globaltag='106X_dataRun2_v35'
 
 print 'running code with GT:  ',process.GlobalTag.globaltag
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(100)
 )
 
 
@@ -135,7 +135,7 @@ setupEgammaPostRecoSeq(process,
 
 
 
-testFile=""
+testFile="file:/afs/cern.ch/work/f/fkhuzaim/public/MINIAOD_output/step_miniaod_2.root"
 # Input source
 if options.runOn2018:
         if options.runOnMC:
@@ -172,8 +172,8 @@ updateJetCollection(
    jetCorrections = ('AK8PFPuppi', cms.vstring(['L2Relative', 'L3Absolute','L2L3Residual']), 'None'),
    btagDiscriminators = [
       'pfBoostedDoubleSecondaryVertexAK8BJetTags',
-      'pfDeepDoubleBJetTags:probQ',
-      'pfDeepDoubleBJetTags:probH',
+#      'pfDeepDoubleBJetTags:probQ',
+#      'pfDeepDoubleBJetTags:probH',
       'pfDeepDoubleBvLJetTags:probQCD',
       'pfDeepDoubleBvLJetTags:probHbb',
       'pfDeepDoubleCvLJetTags:probQCD',
@@ -367,22 +367,13 @@ process.puppi.vertexName     = cms.InputTag('offlineSlimmedPrimaryVertices')
 from JMEAnalysis.JetToolbox.jetToolbox_cff import jetToolbox
 ### CA15Puppi)
 ### do we still need this? I guess no.
-if options.runOn2018:
-	jetToolbox( process, 'ca15', 'jetSequence', 'out', PUMethod='Puppi', dataTier='miniAOD', runOnMC=options.runOnMC,
-	    	    bTagDiscriminators=(bTagDiscriminators + ([] if NOTADDHBBTag else ['pfBoostedDoubleSecondaryVertexCA15BJetTags'])),
-	            JETCorrPayload='AK8PFPuppi',JETCorrLevels=jetCorrectionLevelsPuppi,
-	            subJETCorrPayload='AK4PFPuppi',subJETCorrLevels=jetCorrectionLevelsPuppi,
-	            Cut='pt>120',
-	            addSoftDrop=True,addSoftDropSubjets=True, betaCut=1.0, zCutSD=0.15,
-	            addNsub=True )
-else:
-	jetToolbox( process, 'ca15', 'jetSequence', 'out', PUMethod='Puppi', miniAOD=options.useMiniAOD, runOnMC=options.runOnMC,
-                    bTagDiscriminators=(bTagDiscriminators + ([] if NOTADDHBBTag else ['pfBoostedDoubleSecondaryVertexCA15BJetTags'])),
-                    JETCorrPayload='AK8PFPuppi',JETCorrLevels=jetCorrectionLevelsPuppi,
-                    subJETCorrPayload='AK4PFPuppi',subJETCorrLevels=jetCorrectionLevelsPuppi,
-                    Cut='pt>120',
-                    addSoftDrop=True,addSoftDropSubjets=True, betaCut=1.0, zCutSD=0.15,
-                    addNsub=True )
+jetToolbox( process, 'ca15', 'jetSequence', 'out', PUMethod='Puppi', dataTier='miniAOD', runOnMC=options.runOnMC,
+            bTagDiscriminators=(bTagDiscriminators + ([] if NOTADDHBBTag else ['pfBoostedDoubleSecondaryVertexCA15BJetTags'])),
+            JETCorrPayload='AK8PFPuppi',JETCorrLevels=jetCorrectionLevelsPuppi,
+            subJETCorrPayload='AK4PFPuppi',subJETCorrLevels=jetCorrectionLevelsPuppi,
+            Cut='pt>120',
+            addSoftDrop=True,addSoftDropSubjets=True, betaCut=1.0, zCutSD=0.15,
+            addNsub=True )
 
 
 
@@ -430,13 +421,12 @@ process.patSmearedpuppiJets = process.patSmearedJets.clone(
 	src = cms.InputTag("appliedRegpuppiJets"))
 
 
-## Tau ID embedding
 
-from ExoPieElement.TreeMaker.runTauIdMVA import *
-na = TauIDEmbedder(process, cms,
-		   debug=True,
-		   toKeep = ["2017v2"]
-		   )
+import RecoTauTag.RecoTau.tools.runTauIdMVA as tauIdConfig
+na =tauIdConfig.TauIDEmbedder(process, cms,
+                   debug=True,
+                   toKeep = ["deepTau2017v2p1"]#2017v2"]                                        
+                                         )
 na.runTauID()
 
 ## adding payloads for Tau ID discriminator
@@ -619,11 +609,11 @@ process.appliedRegpuppiJets = process.appliedRegJets.clone(JetTag=cms.InputTag("
 
 if not options.useJECText:
 	process.analysis = cms.Path(
-		process.ecalBadCalibReducedMINIAODFilter*
+#		process.ecalBadCalibReducedMINIAODFilter*
 		process.trigFilter
 		*process.rerunMvaIsolationSequence
-		*process.NewTauIDsEmbedded+
-		process.egammaPostRecoSeq+
+#		*process.NewTauIDsEmbedded+
+                +process.egammaPostRecoSeq+
 		process.appliedRegJets+
         # process.appliedRegpuppiJets+
 		process.patSmearedJets+
@@ -633,11 +623,11 @@ if not options.useJECText:
 		)
 else:
 	process.analysis = cms.Path(
-		process.ecalBadCalibReducedMINIAODFilter*
+#		process.ecalBadCalibReducedMINIAODFilter*
 		process.trigFilter
 		*process.rerunMvaIsolationSequence
-		*process.NewTauIDsEmbedded+
-		process.egammaPostRecoSeq+
+#		*process.NewTauIDsEmbedded+
+                + process.egammaPostRecoSeq+
 		process.appliedRegJets+
         # process.appliedRegpuppiJets+
 		process.patSmearedJets+

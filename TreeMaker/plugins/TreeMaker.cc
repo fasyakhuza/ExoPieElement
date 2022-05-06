@@ -54,7 +54,6 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig):
   fillAK4PuppiJetInfo_   = iConfig.getParameter<bool>("fillAK4PuppiJetInfo");
   fillAK8PuppiJetInfo_   = iConfig.getParameter<bool>("fillAK8PuppiJetInfo");
   fillCA15PuppiJetInfo_   = iConfig.getParameter<bool>("fillCA15PuppiJetInfo");
-  std::cout<<" called ca15 from Treemaker "<<std::endl;
 
   edm::Service<TFileService> fs;
 
